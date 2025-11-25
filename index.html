@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .calculator {
+            background: #2d3748;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 320px;
+        }
+
+        .display {
+            background: #1a202c;
+            color: #fff;
+            padding: 15px 20px;
+            text-align: right;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            min-height: 80px;
+        }
+
+        .previous-value {
+            font-size: 1.2rem;
+            color: #a0aec0;
+            min-height: 25px;
+            word-wrap: break-word;
+            word-break: break-all;
+        }
+
+        .current-value {
+            font-size: 2.5rem;
+            color: #fff;
+            word-wrap: break-word;
+            word-break: break-all;
+        }
+
+        .calculator-body {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 15px;
+        }
+
+        .numbers {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .operators {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        button {
+            padding: 20px;
+            font-size: 1.5rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .btn-number, .btn-operator {
+            background: #4a5568;
+            color: #fff;
+        }
+
+        .btn-number:hover, .btn-operator:hover {
+            background: #5a6678;
+        }
+
+        .btn-clear {
+            background: #fc8181;
+            color: #fff;
+        }
+
+        .btn-clear:hover {
+            background: #f56565;
+        }
+
+        .btn-equals {
+            background: #48bb78;
+            color: #fff;
+        }
+
+        .btn-equals:hover {
+            background: #38a169;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display">
+            <div class="previous-value" id="previousDisplay"></div>
+            <div class="current-value" id="display">0</div>
+        </div>
+        <div class="calculator-body">
+            <div class="numbers">
+                <button class="btn-number" onclick="appendNumber('7')">7</button>
+                <button class="btn-number" onclick="appendNumber('8')">8</button>
+                <button class="btn-number" onclick="appendNumber('9')">9</button>
+                
+                <button class="btn-number" onclick="appendNumber('4')">4</button>
+                <button class="btn-number" onclick="appendNumber('5')">5</button>
+                <button class="btn-number" onclick="appendNumber('6')">6</button>
+                
+                <button class="btn-number" onclick="appendNumber('1')">1</button>
+                <button class="btn-number" onclick="appendNumber('2')">2</button>
+                <button class="btn-number" onclick="appendNumber('3')">3</button>
+                
+                <button class="btn-clear" onclick="clearDisplay()">C</button>
+                <button class="btn-number" onclick="appendNumber('0')">0</button>
+                <button class="btn-number" onclick="appendNumber('.')">.</button>
+            </div>
+            
+            <div class="operators">
+                <button class="btn-operator" onclick="appendOperator('/')">/</button>
+                <button class="btn-operator" onclick="appendOperator('*')">×</button>
+                <button class="btn-operator" onclick="appendOperator('-')">-</button>
+                <button class="btn-operator" onclick="appendOperator('+')">+</button>
+                <button class="btn-equals" onclick="calculate()">=</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let display = document.getElementById('display');
+        let previousDisplay = document.getElementById('previousDisplay');
+        let currentValue = '0';
+        let previousValue = null;
+        let operator = null;
+        let waitingForNewValue = false;
+
+        function updateDisplay() {
+            display.textContent = currentValue;
+            
+            if (previousValue !== null && operator !== null) {
+                previousDisplay.textContent = `${previousValue} ${operator}`;
+            } else {
+                previousDisplay.textContent = '';
+            }
+        }
+
+        function appendNumber(num) {
+            if (waitingForNewValue) {
+                currentValue = num;
+                waitingForNewValue = false;
+            } else {
+                if (currentValue === '0' && num !== '.') {
+                    currentValue = num;
+                } else if (num === '.' && currentValue.includes('.')) {
+                    return;
+                } else {
+                    currentValue += num;
+                }
+            }
+            updateDisplay();
+        }
+
+        function appendOperator(op) {
+            if (operator !== null && !waitingForNewValue) {
+                calculate();
+            }
+            previousValue = parseFloat(currentValue);
+            operator = op;
+            waitingForNewValue = true;
+        }
+
+        function calculate() {
+            if (operator === null || previousValue === null) {
+                return;
+            }
+
+            const current = parseFloat(currentValue);
+            let result;
+
+            switch (operator) {
+                case '+':
+                    result = previousValue + current;
+                    break;
+                case '-':
+                    result = previousValue - current;
+                    break;
+                case '*':
+                    result = previousValue * current;
+                    break;
+                case '/':
+                    result = previousValue / current;
+                    break;
+                case '%':
+                    result = previousValue % current;
+                    break;
+                default:
+                    return;
+            }
+
+            // Show the complete equation before showing result
+            previousDisplay.textContent = `${previousValue} ${operator} ${currentValue}`;
+            currentValue = result.toString();
+            operator = null;
+            previousValue = null;
+            waitingForNewValue = true;
+            display.textContent = currentValue;
+        }
+
+        function clearDisplay() {
+            currentValue = '0';
+            previousValue = null;
+            operator = null;
+            waitingForNewValue = false;
+            updateDisplay();
+        }
+    </script>
+</body>
+</html>
